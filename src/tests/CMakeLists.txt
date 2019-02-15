@@ -53,4 +53,16 @@ find_package(Boost 1.57.0 REQUIRED COMPONENTS unit_test_framework)
     # run tests for xtp (for coverage) as well
     set_tests_properties(unit_${PROG} PROPERTIES LABELS "xtp;votca")
   endforeach(PROG)
+  
+  #copy datafiles needed by tests into their folder
+  list(APPEND test_data_files system.log)
+  list(APPEND test_data_files system_wfOpt.log)
+  list(APPEND test_data_files WFNCOEF)
+  list(APPEND test_data_files OVERLAP)
+  foreach(DATFILE ${test_data_files} )
+    add_custom_command(TARGET unit_test_qmpackage_cpmd POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_SOURCE_DIR}/data_files/${DATFILE}
+                ${CMAKE_CURRENT_BINARY_DIR}/${DATFILE})
+  endforeach(DATFILE)
 endif()

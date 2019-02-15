@@ -44,7 +44,7 @@ void AOBasis::ReorderMOs(Eigen::MatrixXd &v, const std::string& start, const std
         return;
     }
     
-    if(target=="orca" || target=="nwchem"){
+    if(target == "orca" || target == "nwchem" || target == "cpmd"){
         std::vector<int> multiplier = getMultiplierVector(target,start);
         // and reorder rows of _orbitals->_mo_coefficients() accordingly
         MultiplyMOs(v, multiplier);
@@ -235,9 +235,17 @@ void AOBasis::addMultiplierShell(const std::string& start, const std::string& ta
                 multiplier.push_back(1);
             }
             else if (shell_type == "P") {
-                multiplier.push_back(1);
-                multiplier.push_back(1);
-                multiplier.push_back(1);
+                if(start == "cpmd"){
+                    //cpmd order is -px -pz -py
+                    multiplier.push_back(-1);
+                    multiplier.push_back(-1);
+                    multiplier.push_back(-1);
+                }
+                else{
+                    multiplier.push_back(1);
+                    multiplier.push_back(1);
+                    multiplier.push_back(1);
+                }
             }
             else if (shell_type == "D") {
                 if (start == "nwchem") {
@@ -246,7 +254,7 @@ void AOBasis::addMultiplierShell(const std::string& start, const std::string& ta
                     multiplier.push_back(-1);
                     multiplier.push_back(1);
                     multiplier.push_back(1);
-                } else if (start == "orca"){
+                } else if (start == "orca" || start == "cpmd"){
                     multiplier.push_back(1);
                     multiplier.push_back(1);
                     multiplier.push_back(1);

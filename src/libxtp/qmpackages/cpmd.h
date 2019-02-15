@@ -63,8 +63,9 @@ public:
        _ZV=NULL;
        _NA=NULL;
        _NUMAOR=NULL;
-       VOTCA2CPMD_map=NULL;
-       CPMD2VOTCA_map=NULL;
+       VOTCA2CPMD_map.clear();
+       CPMD2VOTCA_map.clear();
+       CPMD2TYPE_map.clear();
        _box=tools::vec(0.0);
    }
    
@@ -76,8 +77,9 @@ public:
            delete[] _NA;
            delete[] _NUMAOR;
        }
-       if(VOTCA2CPMD_map!=NULL){ delete[] VOTCA2CPMD_map;}
-       if(CPMD2VOTCA_map!=NULL){ delete[] CPMD2VOTCA_map;}
+       VOTCA2CPMD_map.clear();
+       CPMD2VOTCA_map.clear();
+       CPMD2TYPE_map.clear();
    };
    
 // private functions
@@ -146,7 +148,8 @@ private:
     int _NSP;                    
     double *_ZV;             //core charge
     int *_NA, *_NUMAOR;
-    int *VOTCA2CPMD_map, *CPMD2VOTCA_map;
+    std::map<int,int> VOTCA2CPMD_map;
+    std::map<int,int> CPMD2VOTCA_map;
     std::map<int,std::string> CPMD2TYPE_map;
     
 /*

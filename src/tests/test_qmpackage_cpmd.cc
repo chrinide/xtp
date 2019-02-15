@@ -19,17 +19,31 @@
 #include <boost/test/unit_test.hpp>
 #include "../libxtp/qmpackages/cpmd.h"
 #include <votca/xtp/qmpackagefactory.h>
+#include <fstream>
+#include <cstdlib>
 
 
 using namespace votca;
 using namespace votca::xtp;
 
+void check_hash(std::string fname, std::string true_hash){
+    std::string _command;   
+    _command = "md5sum " + fname + " > cpmd_test_md5.txt";
+    std::system(_command.c_str());
+    std::ifstream hash_file( "cpmd_test_md5.txt" );
+    std::string test_hash;
+    std::getline(hash_file,test_hash);
+    test_hash = test_hash.substr(0, 32);
+    BOOST_CHECK_MESSAGE( (test_hash == true_hash), fname +" contents doesn't match expected");
+}
+
+
 BOOST_AUTO_TEST_SUITE(cpmd_test)
 
-BOOST_AUTO_TEST_CASE(write_input_test) {
+BOOST_AUTO_TEST_CASE(input_and_parse_test) {
     //setup logger
     Logger      _log;
-    _log.setReportLevel( logWARNING );
+    _log.setReportLevel( logDEBUG );
     _log.setMultithreading( true );
     _log.setPreface(logINFO,    "\n... ...");
     _log.setPreface(logERROR,   "\n... ...");
@@ -48,6 +62,7 @@ BOOST_AUTO_TEST_CASE(write_input_test) {
     xml_inp << "  <scratch></scratch>" << std::endl;
     xml_inp << "  <cleanup>inp,basis</cleanup>" << std::endl;
     xml_inp << "  <optimizewf>1.0e-6</optimizewf>" << std::endl;
+    xml_inp << "  <projectwf>1</projectwf>" << std::endl;
     xml_inp << "  <pwcutoff>90.0</pwcutoff>" << std::endl;
     xml_inp << "  <basisset>ubecp</basisset>" << std::endl;
     xml_inp << "  <ecp>corelevels.xml</ecp>" << std::endl;
@@ -69,7 +84,6 @@ BOOST_AUTO_TEST_CASE(write_input_test) {
     xml_inp << "    </l>" << std::endl;
     xml_inp << "  </functional>" << std::endl;
     xml_inp << "</package>" << std::endl;
-    //xml_inp << "" << std::endl;
     xml_inp.close();
     
     //parse options
@@ -82,6 +96,42 @@ BOOST_AUTO_TEST_CASE(write_input_test) {
     qmpackage->setLog( &_log );       
     qmpackage->Initialize( _package_options );
     qmpackage->setRunDir(".");
+    
+    //set up the system
+    Orbitals orbitals;
+    std::ofstream xyz_inp( "cpmd_test.xyz" );
+    xyz_inp << "         3"<< std::endl;
+    xyz_inp << std::endl;
+    xyz_inp << "O     2.64589     2.64589     2.763066" << std::endl;
+    xyz_inp << "H     1.88894     2.64589     2.177186" << std::endl;
+    xyz_inp << "H     3.40284     2.64589     2.177186" << std::endl;
+    xyz_inp.close();
+    orbitals.QMAtoms().LoadFromXYZ("cpmd_test.xyz");
+    qmpackage->WriteInputFile(orbitals);
+    
+    
+    //check that outputs match expected ones
+    check_hash("system.inp", "084ec5c118b552f2478e33169e199a52");
+    check_hash("system_wfOpt.inp", "37e2e2cba36eeb8cdef493b8d01c642b");
+    check_hash("O_ubecp.basis", "7815593830fc7fb4d888dc87275d3564");
+    check_hash("H_ubecp.basis", "c479f4d3a194f1ee06d448f90738491f");
+    
+    //check parsing of output
+    qmpackage->ParseLogFile(orbitals);
+    BOOST_CHECK_EQUAL(orbitals.getLumo(), 4); //number of states
+    Eigen::MatrixXd MO = orbitals.MOCoefficients();
+    std::ofstream MO_out( "cpmd_test_MO.dat" );
+    MO_out << MO;
+    MO_out.close();
+    
+    
+    //cleanup
+    std::remove("cpmd_test_md5.txt");
+    std::remove("system.inp");
+    std::remove("system_wfOpt.inp");
+    std::remove("O_ubecp.basis");
+    std::remove("H_ubecp.basis");
+    
 }
 
 BOOST_AUTO_TEST_CASE(parse_output_test) {

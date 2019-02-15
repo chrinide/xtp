@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <vector>
 #include <functional>
+#include <eigen3/Eigen/src/Core/PlainObjectBase.h>
 
 #ifdef DEBUG
 #include <votca/xtp/aomatrix.h>
@@ -141,7 +142,7 @@ namespace votca {
             
             // check if ecp is specified
             if (!options.exists(key + ".ecp")) {
-                _ecp_name = "corelevels.xml";
+                _ecp_name = "corelevels";
                 XTP_LOG(logDEBUG, *_pLog) << "Effective core potential not specified."
                         << " Setting to "<< _ecp_name
                         << " as those should be compatible with CPMD."
@@ -377,12 +378,8 @@ namespace votca {
             
             
             //now loop over elements and store all atoms of that element
-            bool atomOrderMapSet = (VOTCA2CPMD_map!=NULL && CPMD2VOTCA_map!=NULL);
+            bool atomOrderMapSet = (VOTCA2CPMD_map.size()!=0 && CPMD2VOTCA_map.size()!=0);
             int Vind=0, Cind=0; //atom indexes in VOTCA and CPMD
-            if(!atomOrderMapSet){
-                VOTCA2CPMD_map=new int[numAtoms];
-                CPMD2VOTCA_map=new int[numAtoms];
-            }
 
             for (const std::string& element_name:UniqueElements) {
                 if(_ppFileNames.find(element_name)==_ppFileNames.end()) {
@@ -419,8 +416,8 @@ namespace votca {
                     _com_file << "   "<< _nAtomsOfElement[element_name] <<std::endl;  //# atoms of element
                     
                     //store atomic positions of atoms of this element
+                    Vind=0;
                     for(const QMAtom& a:qmatoms){
-                        Vind=0;
                         if(a.getElement() == element_name){ //this element
                             Eigen::Vector3d pos = a.getPos(); //in Bohr
                             _com_file << "   ";
@@ -441,7 +438,6 @@ namespace votca {
                     }
                 }
             }
-            
             //#warning "TODO: copy pseudopotentials to the _run_dir"
             _com_file << "&END" << std::endl;
             
@@ -876,7 +872,7 @@ namespace votca {
                             }
                         }
 //                        v=v*tools::conv::bohr2ang;
-                        positions.push_back(Eigen::Vector3d(v.getX(),v.getY(),v.getZ())); //store positions in Bohr
+                        positions.push_back(Eigen::Vector3d(v.getX(),v.getY(),v.getZ())); //store positions in Bohr in CPMD order
                     }while(true);
                 }
                 
@@ -906,12 +902,13 @@ namespace votca {
             _input_file.close();
             
             //check that CPMD2TYPE_map is available
-            if(CPMD2VOTCA_map==NULL){
+            if(CPMD2VOTCA_map.size()==0){
                 XTP_LOG(logDEBUG, *_pLog) << "CPMD: Can not convert atom order from CPMD to VOTCA." << std::flush;
                 XTP_LOG(logDEBUG, *_pLog) << "CPMD: Please rerun with writing CPMD input (<tasks>input, parse</tasks>)." << std::flush;
                 throw std::runtime_error("CPMD2TYPE_map unavailable, rerun with <tasks>input, parse</tasks>");
                 exit(-1);
             }
+            
             
             //store atoms to Orbitals in VOTCA's order
             bool has_atoms = orbitals.hasQMAtoms();
@@ -929,34 +926,36 @@ namespace votca {
             if(_projectWF){
                 //MO coefficient and overlap matrices
                 if(!loadMatrices(orbitals)) return false;
-
-                //Check sanity of ECPs
-                if(orbitals.hasQMAtoms()){
-                    //lets test in CPMD's order
-
-                    //iterate over elements
-                    int i=0; //element index
-                    int c=0; //atom index in CPMD
-                    for(const std::string& element_name:_elements){
-                        for(int a=0; a<_NA[i]; a++){ //check each atom
-                            int v = ConvAtomIndex_CPMD2VOTCA(c);
-                            QMAtom& pAtom = orbitals.QMAtoms().at(v);
-                            if(pAtom.getNuccharge() != _ZV[i]){
-                                XTP_LOG(logERROR, *_pLog) << "CPMD: ECP core charge mismatch for element "
-                                        << element_name << ". CPMD uses a nuclear charge of " << _ZV[i]
-                                        << "and your ECP file (" << _ecp_name << ") uses "
-                                        << pAtom.getNuccharge()
-                                        <<". Adjust your ECP file!" << std::flush;
-                            }
-                            c++;
-                        }
-                        i++;
-                    }
-                }
             }
             
             //fix order for version 5 of .orb files
             ReorderOutput(orbitals);            
+            
+            //Check sanity of ECPs. Needs to happen after reorder to load ECP charges properly.
+            if(orbitals.hasQMAtoms()){
+                //lets test in CPMD's order
+
+                //iterate over elements
+                int i=0; //element index
+                int c=0; //atom index in CPMD
+                for(const std::string& element_name:_elements){
+                    for(int a=0; a<_NA[i]; a++){ //check each atom
+                        int v = ConvAtomIndex_CPMD2VOTCA(c);
+                        QMAtom& pAtom = orbitals.QMAtoms().at(v);
+                        if(pAtom.getNuccharge() != _ZV[i]){
+                            XTP_LOG(logERROR, *_pLog) << "CPMD: ECP core charge mismatch for element "
+                                    << element_name << ". CPMD uses a nuclear charge of " << _ZV[i]
+                                    << " and your ECP file (" << _ecp_name << ") uses "
+                                    << pAtom.getNuccharge()
+                                    <<". Adjust your ECP file!" << std::flush;
+                            throw std::runtime_error("ECP mismatch.");
+                        }
+                        c++;
+                    }
+                    i++;
+                }
+            }
+            
             return true;
 
         }
@@ -981,11 +980,11 @@ namespace votca {
             wf_file.read((char*)&count, _F_int_size); //bytes in this record
             int bl=count;
 
-            int NATTOT=0;
-            wf_file.read((char*)&NATTOT, _F_int_size);    //number of basis functions
+            int num_basis_func=0;
+            wf_file.read((char*)&num_basis_func, _F_int_size);    //number of basis functions
             bl-=_F_int_size;
-            orbitals.setBasisSetSize(NATTOT);
-            XTP_LOG(logDEBUG, *_pLog) << "Basis functions: " << NATTOT << std::flush;
+            orbitals.setBasisSetSize(num_basis_func);
+            XTP_LOG(logDEBUG, *_pLog) << "CPMD: Number of basis functions: " << num_basis_func << std::flush;
 
             _NSP=0;                  //number of atom types
             wf_file.read((char*)&_NSP, _F_int_size);
@@ -1026,8 +1025,8 @@ namespace votca {
             wf_file.read((char*)&count, _F_int_size); //bytes in this record
             bl=count;
 
-            int NUMORB=count/_F_real_size/NATTOT;          //number of MOs (energy levels))
-            XTP_LOG(logDEBUG, *_pLog) << "CPMD: number of energy levels: " << NUMORB << std::flush;
+            int num_levels=count/_F_real_size/num_basis_func;          //number of MOs (energy levels))
+            XTP_LOG(logDEBUG, *_pLog) << "CPMD: number of energy levels: " << num_levels << std::flush;
                 //resize the coefficient matrix
             
             
@@ -1035,7 +1034,7 @@ namespace votca {
             
             //map atomic orbitals to (CPMD) atom indeces so we can reorder the MO and Overlap matrices to VOTCA's atom order
             XTP_LOG(logDEBUG, *_pLog) << "CPMD: Reordering orbitals."<< std::flush;
-            int* AO_CPMD2VOTCA_map= new int[NATTOT];
+            int* AO_CPMD2VOTCA_map= new int[num_basis_func];
             int* VOTCA2numAOs= new int[totAtoms];   //number of AOs for each atom in VOTCA atomic order 
             int* VOTCA2firstAO= new int[totAtoms];  //index of first AO of each atom in VOTCA atomic order 
             if(AO_CPMD2VOTCA_map==NULL || VOTCA2numAOs==NULL || VOTCA2firstAO==NULL){
@@ -1080,15 +1079,17 @@ namespace votca {
             
             XTP_LOG(logDEBUG, *_pLog) << "CPMD: Reading MO coefficients."<< std::flush;
             Eigen::MatrixXd& mo_coefficients = orbitals.MOCoefficients();
-            mo_coefficients.resize(NUMORB, NATTOT);
+            //mo_coefficients.resize(num_levels, num_basis_func); //other QM packages use (levels, basis_size) here, but they seem to assume levels=basis_size
+            mo_coefficients.resize(num_basis_func, num_basis_func); //only the first energy levels will be filled.
+            XTP_LOG(logDEBUG, *_pLog) << "Debug: MO coef. matrix matrix size: "<<mo_coefficients.rows()<<" rows and "<<mo_coefficients.cols()<< " cols" << std::flush;
             
             //mo_coefficients need to be in VOTCA's atomic order
             //AO reordering comes later
             double XXMAT;
-            for(int i=0; i<NUMORB; i++){
-                for(int j=0; j<NATTOT; j++){  
+            for(int i=0; i<num_levels; i++){  //CPMD MOs
+                for(int j=0; j<num_basis_func; j++){  //CPMD AOs
                     wf_file.read((char*)&XXMAT, _F_real_size);
-                    mo_coefficients(i,AO_CPMD2VOTCA_map[j])=XXMAT; //(MO, basisfunc in votca atom order)
+                    mo_coefficients(i, AO_CPMD2VOTCA_map[j])=XXMAT; //other QM packages use (AO,level) here
                     bl-=_F_real_size;
                 }
             }
@@ -1119,10 +1120,10 @@ namespace votca {
             
             //read OVERLAP
             count=0, endcount=0;
-            ov_file.read((char*)&count, 4); //bytes in this record
+            ov_file.read((char*)&count, _F_int_size); //bytes in this record
             bl=count;
             
-            if(NATTOT*NATTOT!=count/8)
+            if((num_basis_func*num_basis_func) != count/_F_real_size)
             {
                 XTP_LOG(logERROR, *_pLog) << "CPMD: " << "Number of basis functions in the overlap and coefficient matrices do not match."<< std::endl << std::flush;
                 throw std::runtime_error("IO error");
@@ -1132,14 +1133,15 @@ namespace votca {
             
                 //resize the overlap matrix
             Eigen::MatrixXd &overlap = orbitals.AOOverlap();
-            overlap.resize(NATTOT,NATTOT);
+            overlap.resize(num_basis_func,num_basis_func);
+            XTP_LOG(logDEBUG, *_pLog) << "Debug: Overlap matrix size: "<<overlap.rows()<<" rows and "<<overlap.cols()<< " cols" << std::flush;
             
             //read
             //Overlap need to be in VOTCA's atomic order
             XTP_LOG(logDEBUG, *_pLog) << "CPMD: Reading Overlap matrix."<< std::flush;
             double XSMAT;
-            for(int i=0; i<NATTOT; i++){
-                for(int j=0; j<NATTOT; j++){  
+            for(int i=0; i<num_basis_func; i++){
+                for(int j=0; j<num_basis_func; j++){  
                     ov_file.read((char*)&XSMAT, _F_real_size);
                     overlap(AO_CPMD2VOTCA_map[i],AO_CPMD2VOTCA_map[j])=XSMAT;
                     bl-=_F_real_size;
