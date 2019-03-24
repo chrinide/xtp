@@ -17,13 +17,13 @@
  *
  */
 
-
 #ifndef VOTCA_XTP_QMDATABASE2_H
-#define	VOTCA_XTP_QMDATABASE2_H
+#define VOTCA_XTP_QMDATABASE2_H
 
 #include <votca/tools/database.h>
 
-namespace votca { namespace xtp {
+namespace votca {
+namespace xtp {
 
 /**
  * \brief the state database
@@ -31,21 +31,18 @@ namespace votca { namespace xtp {
  * This class contains management of state databases. It creates
  * new databases and opens or upgrades existing ones.
  */
-class QMDatabase : public tools::Database 
-{
-public:
-    
-    /**
-     * \brief Create the database scheme
-     *
-     * This function is called when a database is created.
-     * All tables and triggers should be added here.
-     */
-    void onCreate();
+class QMDatabase : public tools::Database {
+ public:
+  /**
+   * \brief Create the database scheme
+   *
+   * This function is called when a database is created.
+   * All tables and triggers should be added here.
+   */
+  void onCreate();
 };
 
-}}
+}  // namespace xtp
+}  // namespace votca
 
-#endif	// VOTCA_XTP_QMDATABASE2_H
-
-
+#endif  // VOTCA_XTP_QMDATABASE2_H

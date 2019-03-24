@@ -18,16 +18,14 @@
  */
 
 #ifndef __VOTCA_XTP_NWCHEM_H
-#define	__VOTCA_XTP_NWCHEM_H
-
+#define __VOTCA_XTP_NWCHEM_H
 
 #include <votca/xtp/qmpackage.h>
 
 #include <string>
 
-
-
-namespace votca { namespace xtp {
+namespace votca {
+namespace xtp {
 /**
     \brief Wrapper for the Gaussian program
 
@@ -35,51 +33,45 @@ namespace votca { namespace xtp {
     and extracts information from its log and io files
 
 */
-class NWChem : public QMPackage
-{
-public:
+class NWChem : public QMPackage {
+ public:
+  std::string getPackageName() const { return "nwchem"; }
 
-   std::string getPackageName() const{ return "nwchem"; }
+  void Initialize(tools::Property& options);
 
-   void Initialize( tools::Property &options );
+  bool WriteInputFile(const Orbitals& orbitals);
 
-   bool WriteInputFile(const Orbitals& orbitals);
+  bool Run();
 
-   bool Run();
+  void CleanUp();
 
-   void CleanUp();
+  bool ParseLogFile(Orbitals& orbitals);
 
-   bool ParseLogFile( Orbitals& orbitals );
+  bool ParseOrbitalsFile(Orbitals& orbitals);
 
-   bool ParseOrbitalsFile( Orbitals& orbitals );
-   
+  std::string getScratchDir() { return _scratch_dir; }
 
-   std::string getScratchDir( ) { return _scratch_dir; }
+ private:
+  bool CheckLogFile();
+  bool WriteShellScript();
+  bool WriteGuess(const Orbitals& orbitals);
 
-private:
-    bool CheckLogFile();
-    bool WriteShellScript();
-    bool WriteGuess(const Orbitals& orbitals);
-  
-    
-    
+  std::string _shell_file_name;
+  std::string _chk_file_name;
+  std::string _scratch_dir;
+  bool _is_optimization;
 
-    std::string                              _shell_file_name;
-    std::string                              _chk_file_name;
-    std::string                              _scratch_dir;
-    bool                                _is_optimization;
+  std::string _cleanup;
 
-    std::string                              _cleanup;
-    
-    void WriteBasisset(std::ofstream& nw_file, const QMMolecule& qmatoms);
-    void WriteECP(std::ofstream& nw_file, const QMMolecule& qmatoms);
+  void WriteBasisset(std::ofstream& nw_file, const QMMolecule& qmatoms);
+  void WriteECP(std::ofstream& nw_file, const QMMolecule& qmatoms);
 
-    std::string FortranFormat( const double &number );
-    int WriteBackgroundCharges(std::ofstream& nw_file);
-    void WriteChargeOption();
+  std::string FortranFormat(const double& number);
+  int WriteBackgroundCharges(std::ofstream& nw_file);
+  void WriteChargeOption();
 };
 
+}  // namespace xtp
+}  // namespace votca
 
-}}
-
-#endif	/* __VOTCA_XTP_NWCHEM_H */
+#endif /* __VOTCA_XTP_NWCHEM_H */

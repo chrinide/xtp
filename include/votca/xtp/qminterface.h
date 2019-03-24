@@ -1,4 +1,4 @@
-/* 
+/*
  *            Copyright 2009-2018 The VOTCA Development Team
  *                       (http://www.votca.org)
  *
@@ -18,32 +18,27 @@
  */
 
 #ifndef VOTCA_XTP_QMMINTERFACE_H
-#define	VOTCA_XTP_QMMINTERFACE_H
+#define VOTCA_XTP_QMMINTERFACE_H
 
-namespace votca { 
-  
-  namespace xtp {
+namespace votca {
 
-    class Segment;
-    class QMMolecule;
+namespace xtp {
+
+class Segment;
+class QMMolecule;
 
 // ========================================================================== //
 // QM-MM INTERFACE CLASS - CONVERTS BETWEEN QMATOMS <> POLAR OBJECTS          //
 // ========================================================================== //
-    
-class QMInterface
-{
-public:
 
-    QMMolecule Convert( std::vector<Segment* > segments);
-     
-private:
+class QMInterface {
+ public:
+  QMMolecule Convert(std::vector<Segment*> segments);
 
+ private:
 };
 
+}  // namespace xtp
+}  // namespace votca
 
-
-
-}}
-
-#endif // VOTCA_XTP_QMMINTERFACE_H
+#endif  // VOTCA_XTP_QMMINTERFACE_H

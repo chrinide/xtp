@@ -16,38 +16,34 @@
  * limitations under the License.
  *
  */
-                                                                                           
-#include <votca/xtp/qmatom.h>                                                                                                      
-#include <votca/xtp/qminterface.h>
-#include <votca/xtp/segment.h>  
-#include <votca/xtp/qmmolecule.h>
-#include <votca/xtp/atom.h>
+
 #include <boost/format.hpp>
+#include <votca/xtp/atom.h>
+#include <votca/xtp/qmatom.h>
+#include <votca/xtp/qminterface.h>
+#include <votca/xtp/qmmolecule.h>
+#include <votca/xtp/segment.h>
 
 using boost::format;
 
 namespace votca {
-    namespace xtp {
+namespace xtp {
 
-        QMMolecule QMInterface::Convert(std::vector<Segment* > segments) {
-            QMMolecule result=QMMolecule("QMAtoms",0);
-            for (unsigned AtomId=0;AtomId<segments.size();++AtomId) {
-                Segment* segment=segments[AtomId];
-                std::vector < Atom* >& atoms = segment->Atoms();
-                for (Atom* atom: atoms) {
-                    if(!atom->HasQMPart()){
-                      continue;
-                    }
-                    Eigen::Vector3d pos = atom->getQMPos().toEigen() * tools::conv::nm2bohr;
-                    result.push_back(QMAtom(AtomId,atom->getElement(),pos));
-                }
-            }
-            return result;
-        }
-
-       
-
-   
-
+QMMolecule QMInterface::Convert(std::vector<Segment*> segments) {
+  QMMolecule result = QMMolecule("QMAtoms", 0);
+  for (unsigned AtomId = 0; AtomId < segments.size(); ++AtomId) {
+    Segment* segment = segments[AtomId];
+    std::vector<Atom*>& atoms = segment->Atoms();
+    for (Atom* atom : atoms) {
+      if (!atom->HasQMPart()) {
+        continue;
+      }
+      Eigen::Vector3d pos = atom->getQMPos().toEigen() * tools::conv::nm2bohr;
+      result.push_back(QMAtom(AtomId, atom->getElement(), pos));
     }
+  }
+  return result;
 }
+
+}  // namespace xtp
+}  // namespace votca

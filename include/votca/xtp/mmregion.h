@@ -17,42 +17,40 @@
  *
  */
 
-
 #ifndef VOTCA_XTP_MMREGION_H
-#define	VOTCA_XTP_MMREGION_H
+#define VOTCA_XTP_MMREGION_H
 
-
-#include <votca/xtp/region.h>
 #include <votca/xtp/polarsegment.h>
+#include <votca/xtp/region.h>
 
-namespace votca { namespace xtp {
+namespace votca {
+namespace xtp {
 
-class MMRegion: public Region{
-    public:
+class MMRegion : public Region {
+ public:
+  void WriteToCpt(CheckpointWriter& w) const;
 
-        void WriteToCpt(CheckpointWriter& w)const;
+  void ReadFromCpt(CheckpointReader& r);
 
-        void ReadFromCpt(CheckpointReader& r);
+  int size() const { return _segments.size(); }
 
-        int size()const{return _segments.size();}
+  std::vector<PolarSegment>::iterator begin() { return _segments.begin(); }
+  std::vector<PolarSegment>::iterator end() { return _segments.end(); }
 
-        std::vector<PolarSegment>::iterator begin(){return _segments.begin();}
-        std::vector<PolarSegment>::iterator end(){return _segments.end();}
+  std::vector<PolarSegment>::const_iterator begin() const {
+    return _segments.begin();
+  }
+  std::vector<PolarSegment>::const_iterator end() const {
+    return _segments.end();
+  }
 
-        std::vector<PolarSegment>::const_iterator begin()const{return _segments.begin();}
-        std::vector<PolarSegment>::const_iterator end()const{return _segments.end();}
+  void push_back(const PolarSegment& seg) { _segments.push_back(seg); }
 
-        void push_back(const PolarSegment& seg){
-            _segments.push_back(seg);
-        }
-        
-    private:
-
-        std::vector<PolarSegment> _segments;
-
+ private:
+  std::vector<PolarSegment> _segments;
 };
 
-}}
+}  // namespace xtp
+}  // namespace votca
 
 #endif /* VOTCA_XTP_MMREGION_H */
-

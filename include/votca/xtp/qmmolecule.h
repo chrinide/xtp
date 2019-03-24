@@ -23,26 +23,19 @@
 #include <votca/xtp/atomcontainer.h>
 #include <votca/xtp/qmatom.h>
 
-
 namespace votca {
-    namespace xtp {
+namespace xtp {
 
-class QMMolecule : public AtomContainer<QMAtom>
-{
-public:
-    QMMolecule(std::string name,int id):AtomContainer<QMAtom>(name,id){};
-        
-    void LoadFromXYZ(const std::string& filename);
+class QMMolecule : public AtomContainer<QMAtom> {
+ public:
+  QMMolecule(std::string name, int id) : AtomContainer<QMAtom>(name, id){};
 
-    void WriteXYZ(const std::string& filename, std::string header) const;
-    
+  void LoadFromXYZ(const std::string& filename);
+
+  void WriteXYZ(const std::string& filename, std::string header) const;
 };
-        
-        
-        
-        
-    }
-}
+
+}  // namespace xtp
+}  // namespace votca
 
 #endif /* VOTCA_XTP_QMMOLECULE_H */
-

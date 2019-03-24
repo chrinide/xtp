@@ -1,4 +1,4 @@
-/* 
+/*
  *            Copyright 2009-2018 The VOTCA Development Team
  *                       (http://www.votca.org)
  *
@@ -18,31 +18,28 @@
  */
 
 #ifndef VOTCA_XTP_JOBTOPOLOGY_H
-#define	VOTCA_XTP_JOBTOPOLOGY_H
-#include <votca/xtp/region.h>
+#define VOTCA_XTP_JOBTOPOLOGY_H
 #include <votca/tools/elements.h>
 #include <votca/xtp/checkpoint.h>
+#include <votca/xtp/region.h>
 
 /**
-* \brief Class to set up the toplogy, e.g division of molecules into different regions for a specific job.
+ * \brief Class to set up the toplogy, e.g division of molecules into different
+ * regions for a specific job.
  *
-*
-* 
-* 
-*/
+ *
+ *
+ *
+ */
 
-namespace votca { namespace xtp {
-   
-class JobTopology{
-    public:
-               
-   
-            
-  protected:
+namespace votca {
+namespace xtp {
 
-      std::vector<std::shared_ptr<Region> > _regions;
-    
-    
-}}
+class JobTopology {
+ public:
+ protected:
+  std::vector<std::shared_ptr<Region> > _regions;
+}
+}  // namespace xtp
 
-#endif	// VOTCA_XTP_ATOMCONTAINER_H
+#endif  // VOTCA_XTP_ATOMCONTAINER_H

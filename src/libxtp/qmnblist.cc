@@ -16,33 +16,35 @@
  * limitations under the License.
  *
  */
-/// For earlier commit history see ctp commit 77795ea591b29e664153f9404c8655ba28dc14e9
+/// For earlier commit history see ctp commit
+/// 77795ea591b29e664153f9404c8655ba28dc14e9
 
 #include <iostream>
-#include <votca/xtp/qmnblist.h>
 #include <votca/tools/globals.h>
+#include <votca/xtp/qmnblist.h>
 #include <votca/xtp/topology.h>
 
 using namespace std;
 
-namespace votca { namespace xtp {
+namespace votca {
+namespace xtp {
 
-  QMPair *QMNBList::Add(Segment* seg1, Segment* seg2,bool safe) {
+QMPair* QMNBList::Add(Segment* seg1, Segment* seg2, bool safe) {
 
-    if (safe){
-      if (this->FindPair(seg1, seg2) != NULL) {
-        throw std::runtime_error("Critical bug: pair already exists");
-      }
+  if (safe) {
+    if (this->FindPair(seg1, seg2) != NULL) {
+      throw std::runtime_error("Critical bug: pair already exists");
     }
-    // POTENTIAL BUGS : +1 added to start from 1;
-    int id = this->size()+1;
-
-    QMPair *pair = new QMPair(id, seg1, seg2);
-
-    this->AddPair(pair);
-
-    return pair;
-
   }
+  // POTENTIAL BUGS : +1 added to start from 1;
+  int id = this->size() + 1;
 
-}}
+  QMPair* pair = new QMPair(id, seg1, seg2);
+
+  this->AddPair(pair);
+
+  return pair;
+}
+
+}  // namespace xtp
+}  // namespace votca

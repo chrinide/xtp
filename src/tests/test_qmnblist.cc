@@ -23,15 +23,12 @@ using namespace votca::xtp;
 
 BOOST_AUTO_TEST_SUITE(qmnblist_test)
 
-BOOST_AUTO_TEST_CASE(constructors_test) { 
-  QMNBList qmnb;
-}
+BOOST_AUTO_TEST_CASE(constructors_test) { QMNBList qmnb; }
 
-BOOST_AUTO_TEST_CASE(cutoff_test){
+BOOST_AUTO_TEST_CASE(cutoff_test) {
   QMNBList qmnb;
   qmnb.setCutoff(23.4);
-  BOOST_CHECK_CLOSE( qmnb.getCutoff(), 23.4, 0.0001 );
-
+  BOOST_CHECK_CLOSE(qmnb.getCutoff(), 23.4, 0.0001);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

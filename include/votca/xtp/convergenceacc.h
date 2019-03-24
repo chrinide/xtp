@@ -1,4 +1,4 @@
-/* 
+/*
  *            Copyright 2009-2018 The VOTCA Development Team
  *                       (http://www.votca.org)
  *
@@ -20,109 +20,108 @@
 #ifndef _VOTCA_XTP_CONVERGENCEACC__H
 #define _VOTCA_XTP_CONVERGENCEACC__H
 
-#include <votca/xtp/basisset.h>
-#include <votca/xtp/logger.h>
-#include <votca/xtp/adiis.h>
-#include <votca/xtp/diis.h>
-#include <votca/xtp/aomatrix.h>
 #include <memory>
-namespace votca { namespace xtp {
+#include <votca/xtp/adiis.h>
+#include <votca/xtp/aomatrix.h>
+#include <votca/xtp/basisset.h>
+#include <votca/xtp/diis.h>
+#include <votca/xtp/logger.h>
+namespace votca {
+namespace xtp {
 
- 
-class ConvergenceAcc{
-    public:
+class ConvergenceAcc {
+ public:
+  enum KSmode { closed, open, fractional };
 
-    enum KSmode { closed, open, fractional };
+  struct options {
+    KSmode mode = KSmode::closed;
+    bool usediis = true;
+    bool noisy = false;
+    int histlength = 10;
+    bool maxout = false;
+    double adiis_start = 2;
+    double diis_start = 0.01;
+    double levelshift = 0.25;
+    double levelshiftend = 0.8;
+    int numberofelectrons;
+    double mixingparameter = 0.7;
+    double Econverged = 1e-7;
+    double error_converged = 1e-7;
+  };
 
-    struct options{
-        KSmode mode=KSmode::closed;
-        bool usediis=true;
-        bool noisy=false;
-        int histlength=10;
-        bool maxout=false;
-        double adiis_start=2;
-        double diis_start=0.01;
-        double levelshift=0.25;
-        double levelshiftend=0.8;
-        int numberofelectrons;
-        double mixingparameter=0.7;
-        double Econverged=1e-7;
-        double error_converged=1e-7;
-    };
-    
-                      
-   void Configure(const ConvergenceAcc::options& opt){
-       _opt=opt;
-       if(_opt.mode==KSmode::closed){
-           _nocclevels=_opt.numberofelectrons/2;
-       }
-       else if(_opt.mode==KSmode::open){
-           _nocclevels=_opt.numberofelectrons;
-       }
-       else if(_opt.mode==KSmode::fractional){
-           _nocclevels=0;
-       }
-   }
-   void setLogger(Logger* log){_log=log;}
-  
-   bool isConverged(){
-       if (_totE.size()<2){
-           return false;
-       }else{
-        return std::abs(_totE.back() - _totE[_totE.size() - 2]) < _opt.Econverged
-                && getDIIsError() < _opt.error_converged;
-       }
-   }
+  void Configure(const ConvergenceAcc::options& opt) {
+    _opt = opt;
+    if (_opt.mode == KSmode::closed) {
+      _nocclevels = _opt.numberofelectrons / 2;
+    } else if (_opt.mode == KSmode::open) {
+      _nocclevels = _opt.numberofelectrons;
+    } else if (_opt.mode == KSmode::fractional) {
+      _nocclevels = 0;
+    }
+  }
+  void setLogger(Logger* log) { _log = log; }
 
-   double getDeltaE(){
-       if (_totE.size()<2){
-           return 0;
-       }else{
-           return _totE.back() - _totE[_totE.size() - 2];
-       }
-   }
-   void setOverlap(AOOverlap* S, double etol);
-   
-   double getDIIsError(){return _diiserror;}
-   
-    bool getUseMixing(){return _usedmixing;}
+  bool isConverged() {
+    if (_totE.size() < 2) {
+      return false;
+    } else {
+      return std::abs(_totE.back() - _totE[_totE.size() - 2]) <
+                 _opt.Econverged &&
+             getDIIsError() < _opt.error_converged;
+    }
+  }
 
-    Eigen::MatrixXd Iterate(const Eigen::MatrixXd& dmat,Eigen::MatrixXd& H,Eigen::VectorXd &MOenergies,Eigen::MatrixXd &MOs,double totE);
-    void SolveFockmatrix(Eigen::VectorXd& MOenergies,Eigen::MatrixXd& MOs,const Eigen::MatrixXd&H);
-    void Levelshift(Eigen::MatrixXd& H);
+  double getDeltaE() {
+    if (_totE.size() < 2) {
+      return 0;
+    } else {
+      return _totE.back() - _totE[_totE.size() - 2];
+    }
+  }
+  void setOverlap(AOOverlap* S, double etol);
 
-    Eigen::MatrixXd DensityMatrix(const Eigen::MatrixXd& MOs, const Eigen::VectorXd& MOEnergies);
-   
+  double getDIIsError() { return _diiserror; }
+
+  bool getUseMixing() { return _usedmixing; }
+
+  Eigen::MatrixXd Iterate(const Eigen::MatrixXd& dmat, Eigen::MatrixXd& H,
+                          Eigen::VectorXd& MOenergies, Eigen::MatrixXd& MOs,
+                          double totE);
+  void SolveFockmatrix(Eigen::VectorXd& MOenergies, Eigen::MatrixXd& MOs,
+                       const Eigen::MatrixXd& H);
+  void Levelshift(Eigen::MatrixXd& H);
+
+  Eigen::MatrixXd DensityMatrix(const Eigen::MatrixXd& MOs,
+                                const Eigen::VectorXd& MOEnergies);
+
  private:
-    options _opt;
+  options _opt;
 
-    Eigen::MatrixXd DensityMatrixGroundState(const Eigen::MatrixXd& MOs);
-    Eigen::MatrixXd DensityMatrixGroundState_unres(const Eigen::MatrixXd& MOs);
-    Eigen::MatrixXd DensityMatrixGroundState_frac(const Eigen::MatrixXd& MOs, const Eigen::VectorXd& MOEnergies);
-     
-    bool             _usedmixing=true;
-    double           _diiserror=std::numeric_limits<double>::max();
-    Logger*     _log;
-    const AOOverlap* _S;
-    
-    Eigen::MatrixXd                 Sminusahalf;
-    Eigen::MatrixXd                 Sonehalf;
-    Eigen::MatrixXd                 MOsinv;
-    std::vector< std::unique_ptr<Eigen::MatrixXd> >   _mathist;
-    std::vector< std::unique_ptr<Eigen::MatrixXd> >   _dmatHist;
-    std::vector<double>                 _totE;
- 
-    int _nocclevels;
-    int _maxerrorindex=0;
-    double _maxerror=0.0;
-    ADIIS _adiis;
-    DIIS _diis;
+  Eigen::MatrixXd DensityMatrixGroundState(const Eigen::MatrixXd& MOs);
+  Eigen::MatrixXd DensityMatrixGroundState_unres(const Eigen::MatrixXd& MOs);
+  Eigen::MatrixXd DensityMatrixGroundState_frac(
+      const Eigen::MatrixXd& MOs, const Eigen::VectorXd& MOEnergies);
 
-  
- };
- 
- 
-}}
+  bool _usedmixing = true;
+  double _diiserror = std::numeric_limits<double>::max();
+  Logger* _log;
+  const AOOverlap* _S;
 
-#endif	
+  Eigen::MatrixXd Sminusahalf;
+  Eigen::MatrixXd Sonehalf;
+  Eigen::MatrixXd MOsinv;
+  std::vector<std::unique_ptr<Eigen::MatrixXd> > _mathist;
+  std::vector<std::unique_ptr<Eigen::MatrixXd> > _dmatHist;
+  std::vector<double> _totE;
 
+  int _nocclevels;
+  int _maxerrorindex = 0;
+  double _maxerror = 0.0;
+  ADIIS _adiis;
+  DIIS _diis;
+};
+
+}  // namespace xtp
+}  // namespace votca
+
+#endif

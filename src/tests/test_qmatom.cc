@@ -19,22 +19,15 @@
 #include <boost/test/unit_test.hpp>
 #include <votca/xtp/qmatom.h>
 
-
 using namespace votca::xtp;
 
 BOOST_AUTO_TEST_SUITE(qmatom_test)
 
 BOOST_AUTO_TEST_CASE(constructors_test) {
-    Eigen::Vector3d pos=Eigen::Vector3d::Zero();
-    QMAtom a(1,"C",pos);
-
-
+  Eigen::Vector3d pos = Eigen::Vector3d::Zero();
+  QMAtom a(1, "C", pos);
 }
 
-BOOST_AUTO_TEST_CASE(translaterotate_test) {
-  
-}
-
-
+BOOST_AUTO_TEST_CASE(translaterotate_test) {}
 
 BOOST_AUTO_TEST_SUITE_END()

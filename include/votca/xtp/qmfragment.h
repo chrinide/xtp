@@ -1,4 +1,4 @@
-/* 
+/*
  *            Copyright 2009-2018 The VOTCA Development Team
  *                       (http://www.votca.org)
  *
@@ -18,86 +18,86 @@
  */
 
 #ifndef VOTCA_XTP_QMFRAGMENT_H
-#define	VOTCA_XTP_QMFRAGMENT_H
-#include <votca/xtp/eigen.h>
-#include <limits>
+#define VOTCA_XTP_QMFRAGMENT_H
 #include <boost/lexical_cast.hpp>
+#include <limits>
+#include <votca/xtp/eigen.h>
 
 /**
-* \brief Container to define fragments of QMmolecules, containing atomindices, no pointers to atoms, it also handles the parsing of strings etc..
-* Values should have own destructor
-*
-* 
-* 
-*/
+ * \brief Container to define fragments of QMmolecules, containing atomindices,
+ * no pointers to atoms, it also handles the parsing of strings etc.. Values
+ * should have own destructor
+ *
+ *
+ *
+ */
 
-namespace votca { namespace xtp {
-   
-template<class T>
-class QMFragment{
-    public:
-               
-    QMFragment(std::string name,int id,std::string atoms):_name(name),_id(id)
-                {FillAtomIndices(atoms);}
+namespace votca {
+namespace xtp {
 
-    void setValue(const T& value){_value=value;}
+template <class T>
+class QMFragment {
+ public:
+  QMFragment(std::string name, int id, std::string atoms)
+      : _name(name), _id(id) {
+    FillAtomIndices(atoms);
+  }
 
-    const T& getValue()const{return _value;}
+  void setValue(const T& value) { _value = value; }
 
-    int size()const{return _atomindices.size();}
+  const T& getValue() const { return _value; }
 
-    const std::vector<int>& getIndices()const{return _atomindices;}
+  int size() const { return _atomindices.size(); }
 
+  const std::vector<int>& getIndices() const { return _atomindices; }
 
-    typename std::vector<int>::const_iterator begin()const{return _atomindices.begin();}
-    typename std::vector<int>::const_iterator end()const{return _atomindices.end();}
-        
-    friend std::ostream &operator<<(std::ostream &out, const QMFragment& fragment){
-        out<<"Fragment name:"<<fragment._name<<" id:"<<fragment._name<<std::endl;
-        out<<"AtomIndices["<<fragment.size()<<"]:";
-        for (int id:fragment._atomindices){
-            out<<id<<" ";
-        }
-        out<<std::endl;
-        out<<"Value:"<<fragment._value;
-        return out;
-    };
-            
-private:
+  typename std::vector<int>::const_iterator begin() const {
+    return _atomindices.begin();
+  }
+  typename std::vector<int>::const_iterator end() const {
+    return _atomindices.end();
+  }
 
-    void FillAtomIndices(const std::string& atoms){
-        tools::Tokenizer tok(atoms," ,\n\t");
-        std::vector<std::string> results;
-        tok.ToVector(results);
-        const std::string delimiter="...";
-        for(std::string s:results){ 
-            if(s.find(delimiter) != std::string::npos){
-                int start = boost::lexical_cast<int>(s.substr(0, s.find(delimiter)));
-                int stop = boost::lexical_cast<int>(s.erase(0,s.find(delimiter) + delimiter.length()));
-                for(int i=start;i<=stop;i++){
-                    _atomindices.push_back(i);
-                }
-            }
-            else{
-                _atomindices.push_back(boost::lexical_cast<int>(s));
-            }
-        }
-        
-        
+  friend std::ostream& operator<<(std::ostream& out,
+                                  const QMFragment& fragment) {
+    out << "Fragment name:" << fragment._name << " id:" << fragment._name
+        << std::endl;
+    out << "AtomIndices[" << fragment.size() << "]:";
+    for (int id : fragment._atomindices) {
+      out << id << " ";
     }
+    out << std::endl;
+    out << "Value:" << fragment._value;
+    return out;
+  };
 
-    std::vector<int> _atomindices;
-    std::string _name;
-    int _id;
-    T _value;
+ private:
+  void FillAtomIndices(const std::string& atoms) {
+    tools::Tokenizer tok(atoms, " ,\n\t");
+    std::vector<std::string> results;
+    tok.ToVector(results);
+    const std::string delimiter = "...";
+    for (std::string s : results) {
+      if (s.find(delimiter) != std::string::npos) {
+        int start = boost::lexical_cast<int>(s.substr(0, s.find(delimiter)));
+        int stop = boost::lexical_cast<int>(
+            s.erase(0, s.find(delimiter) + delimiter.length()));
+        for (int i = start; i <= stop; i++) {
+          _atomindices.push_back(i);
+        }
+      } else {
+        _atomindices.push_back(boost::lexical_cast<int>(s));
+      }
+    }
+  }
 
-    
+  std::vector<int> _atomindices;
+  std::string _name;
+  int _id;
+  T _value;
+};
 
-    
-        
-      };   
-    
-    
-}}
+}  // namespace xtp
+}  // namespace votca
 
-#endif	// VOTCA_XTP_ATOMCONTAINER_H
+#endif  // VOTCA_XTP_ATOMCONTAINER_H

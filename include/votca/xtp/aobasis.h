@@ -1,4 +1,4 @@
-/* 
+/*
  *            Copyright 2009-2018 The VOTCA Development Team
  *                       (http://www.votca.org)
  *
@@ -18,94 +18,95 @@
  */
 
 #ifndef VOTCA_XTP_AOBASIS_H
-#define	VOTCA_XTP_AOBASIS_H
-
+#define VOTCA_XTP_AOBASIS_H
 
 #include <boost/math/constants/constants.hpp>
-#include <votca/xtp/basisset.h>
-#include <votca/xtp/qmmolecule.h>
-#include <votca/xtp/eigen.h>
 #include <votca/xtp/aoshell.h>
+#include <votca/xtp/basisset.h>
+#include <votca/xtp/eigen.h>
+#include <votca/xtp/qmmolecule.h>
 
-
-namespace votca { namespace xtp {
+namespace votca {
+namespace xtp {
 
 /**
- * \brief Container to hold Basisfunctions for all atoms 
- * 
+ * \brief Container to hold Basisfunctions for all atoms
+ *
  * It is constructed from a vector of QMAtoms and a BasisSet.
  */
-class AOBasis 
-{   
-public:
-    
-    void ReorderMOs(Eigen::MatrixXd &v,const std::string& start, const std::string& target ); 
-       
-    void ReorderMatrix(Eigen::MatrixXd &v,const std::string& start,const std::string& target );
+class AOBasis {
+ public:
+  void ReorderMOs(Eigen::MatrixXd& v, const std::string& start,
+                  const std::string& target);
 
-    void AOBasisFill( const BasisSet& bs , const QMMolecule& atoms, int fragbreak = -1);
-    
-//returns element names for which no ecp was found
-    std::vector<std::string> ECPFill( const BasisSet& bs , QMMolecule& atoms);
-    
-    int AOBasisSize() const {return _AOBasisSize; }
-    
-    typedef std::vector< AOShell >::const_iterator AOShellIterator;
-    AOShellIterator begin() const{ return _aoshells.begin(); }
-    AOShellIterator end() const{ return _aoshells.end(); }
+  void ReorderMatrix(Eigen::MatrixXd& v, const std::string& start,
+                     const std::string& target);
 
-    Eigen::MatrixXd getTransformationCartToSpherical(const std::string& package);
-    
-    const AOShell& getShell( int idx )const{ return _aoshells[idx] ;}
-    
-    const std::vector<const AOShell*> getShellsofAtom(int AtomId)const;
-    
-    int getNumofShells() const{return _aoshells.size();}
-   
-    int getAOBasisFragA() const{return _AOBasisFragA;}
-    
-   int getAOBasisFragB() const{return _AOBasisFragB;}
-   
-   int getFuncOfAtom(int AtomIndex)const{return _FuncperAtom[AtomIndex];}
-   
-   const std::vector<int>& getFuncPerAtom()const {return _FuncperAtom;}
+  void AOBasisFill(const BasisSet& bs, const QMMolecule& atoms,
+                   int fragbreak = -1);
 
-   const AOShell& back()const{return _aoshells.back();}
+  // returns element names for which no ecp was found
+  std::vector<std::string> ECPFill(const BasisSet& bs, QMMolecule& atoms);
 
-private:
-    
-  AOShell& addShell( const Shell& shell, const QMAtom& atom, int startIndex );
-  
-  AOShell& addECPShell( const Shell& shell, const QMAtom& atom, int startIndex,bool nonlocal);
-    
-  void MultiplyMOs(Eigen::MatrixXd &v, std::vector<int> const &multiplier );
-   
+  int AOBasisSize() const { return _AOBasisSize; }
 
+  typedef std::vector<AOShell>::const_iterator AOShellIterator;
+  AOShellIterator begin() const { return _aoshells.begin(); }
+  AOShellIterator end() const { return _aoshells.end(); }
 
-    std::vector<int> invertOrder(const std::vector<int>& order );
-    
-    std::vector<int> getReorderVector(const std::string& start,const std::string& target );
-   
-    void addReorderShell(const std::string& start,const std::string& target,const std::string& shell, std::vector<int>& neworder );
-  
-    std::vector<int> getMultiplierVector(const std::string& start,const std::string& target );
-    
-    void addMultiplierShell(const std::string& start,const std::string& target,const std::string& shell, std::vector<int>& multiplier );  
-  
-    void addTrafoCartShell( const AOShell& shell , Eigen::Block<Eigen::MatrixXd>& submatrix );
-    std::vector<AOShell> _aoshells;
-    
-    std::vector<int> _FuncperAtom;
-    
-    int _AOBasisFragA;
-    int _AOBasisFragB;
-    int _AOBasisSize;
-    
+  Eigen::MatrixXd getTransformationCartToSpherical(const std::string& package);
+
+  const AOShell& getShell(int idx) const { return _aoshells[idx]; }
+
+  const std::vector<const AOShell*> getShellsofAtom(int AtomId) const;
+
+  int getNumofShells() const { return _aoshells.size(); }
+
+  int getAOBasisFragA() const { return _AOBasisFragA; }
+
+  int getAOBasisFragB() const { return _AOBasisFragB; }
+
+  int getFuncOfAtom(int AtomIndex) const { return _FuncperAtom[AtomIndex]; }
+
+  const std::vector<int>& getFuncPerAtom() const { return _FuncperAtom; }
+
+  const AOShell& back() const { return _aoshells.back(); }
+
+ private:
+  AOShell& addShell(const Shell& shell, const QMAtom& atom, int startIndex);
+
+  AOShell& addECPShell(const Shell& shell, const QMAtom& atom, int startIndex,
+                       bool nonlocal);
+
+  void MultiplyMOs(Eigen::MatrixXd& v, std::vector<int> const& multiplier);
+
+  std::vector<int> invertOrder(const std::vector<int>& order);
+
+  std::vector<int> getReorderVector(const std::string& start,
+                                    const std::string& target);
+
+  void addReorderShell(const std::string& start, const std::string& target,
+                       const std::string& shell, std::vector<int>& neworder);
+
+  std::vector<int> getMultiplierVector(const std::string& start,
+                                       const std::string& target);
+
+  void addMultiplierShell(const std::string& start, const std::string& target,
+                          const std::string& shell,
+                          std::vector<int>& multiplier);
+
+  void addTrafoCartShell(const AOShell& shell,
+                         Eigen::Block<Eigen::MatrixXd>& submatrix);
+  std::vector<AOShell> _aoshells;
+
+  std::vector<int> _FuncperAtom;
+
+  int _AOBasisFragA;
+  int _AOBasisFragB;
+  int _AOBasisSize;
 };
 
+}  // namespace xtp
+}  // namespace votca
 
- 
-}}
-
-#endif	// VOTCA_XTP_AOBASIS_H
-
+#endif  // VOTCA_XTP_AOBASIS_H

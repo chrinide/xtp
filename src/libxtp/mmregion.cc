@@ -1,4 +1,4 @@
-/* 
+/*
  *            Copyright 2009-2018 The VOTCA Development Team
  *                       (http://www.votca.org)
  *
@@ -19,20 +19,12 @@
 
 #include <votca/xtp/mmregion.h>
 
-
 namespace votca {
-    namespace xtp {
+namespace xtp {
 
+void MMRegion::WriteToCpt(CheckpointWriter& w) const {}
 
-        void MMRegion::WriteToCpt(CheckpointWriter& w)const{
+void MMRegion::ReadFromCpt(CheckpointReader& r) {}
 
-            
-        }
-
-        void MMRegion::ReadFromCpt(CheckpointReader& r){
-            
-        }
-  
-
-    }
-}
+}  // namespace xtp
+}  // namespace votca

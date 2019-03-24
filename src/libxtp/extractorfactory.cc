@@ -17,17 +17,12 @@
  *
  */
 
-
 #include <votca/xtp/extractorfactory.h>
 
+namespace votca {
+namespace xtp {
 
+void ExtractorFactory::RegisterAll(void) {}
 
-
-namespace votca { namespace xtp {
-
-void ExtractorFactory::RegisterAll(void)
-{	
-
-}
-
-}}
+}  // namespace xtp
+}  // namespace votca

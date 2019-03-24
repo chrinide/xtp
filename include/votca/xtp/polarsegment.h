@@ -23,31 +23,23 @@
 #include <votca/xtp/atomcontainer.h>
 #include <votca/xtp/polarsite.h>
 
-
 namespace votca {
-    namespace xtp {
+namespace xtp {
 
-class PolarSegment : public AtomContainer<PolarSite>
-{
-public:
-    PolarSegment(std::string name,int id):AtomContainer<PolarSite>(name,id){};
-    
-    void LoadFromMPS(const std::string& filename);
+class PolarSegment : public AtomContainer<PolarSite> {
+ public:
+  PolarSegment(std::string name, int id) : AtomContainer<PolarSite>(name, id){};
 
-    void WriteMPS(const std::string& filename, std::string header) const;
+  void LoadFromMPS(const std::string& filename);
 
-    double CalcTotalQ()const;
+  void WriteMPS(const std::string& filename, std::string header) const;
 
-    Eigen::Vector3d CalcDipole()const;
+  double CalcTotalQ() const;
 
-    
+  Eigen::Vector3d CalcDipole() const;
 };
-        
-        
-        
-        
-    }
-}
+
+}  // namespace xtp
+}  // namespace votca
 
 #endif /* VOTCA_XTP_POLARSEGMENT_H */
-

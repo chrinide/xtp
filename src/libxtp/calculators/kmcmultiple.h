@@ -17,46 +17,34 @@
  */
 
 #ifndef __VOTCA_KMC_MULTIPLE_H
-#define	__VOTCA_KMC_MULTIPLE_H
-
-
+#define __VOTCA_KMC_MULTIPLE_H
 
 #include <votca/tools/tokenizer.h>
 #include <votca/xtp/kmccalculator.h>
 
 #include <votca/tools/constants.h>
-namespace votca { namespace xtp {
+namespace votca {
+namespace xtp {
 
-  
-   
+class KMCMultiple : public KMCCalculator {
+ public:
+  KMCMultiple(){};
+  ~KMCMultiple(){};
+  std::string Identify() { return "kmcmultiple"; }
+  void Initialize(tools::Property *options);
+  bool EvaluateFrame(Topology *top);
 
-
-class KMCMultiple : public KMCCalculator 
-{
-public:
-    KMCMultiple() {};
-   ~KMCMultiple() {};
-   std::string Identify() { return "kmcmultiple"; }
-    void Initialize(tools::Property *options);
-    bool EvaluateFrame(Topology *top);
-
-
-
-private:
-            
-            void  RunVSSM(Topology *top);
-            double _runtime;
-            double _outputtime;
-            std::string _trajectoryfile;
-            std::string _timefile;
-            double _maxrealtime;
-            int _intermediateoutput_frequency;
-           
+ private:
+  void RunVSSM(Topology *top);
+  double _runtime;
+  double _outputtime;
+  std::string _trajectoryfile;
+  std::string _timefile;
+  double _maxrealtime;
+  int _intermediateoutput_frequency;
 };
 
+}  // namespace xtp
+}  // namespace votca
 
-
-}}
-
-
-#endif	/* __VOTCA_KMC_MULTIPLE_H */
+#endif /* __VOTCA_KMC_MULTIPLE_H */

@@ -20,11 +20,11 @@
 #ifndef VOTCA_XTP_MD2QMENGINE_H
 #define VOTCA_XTP_MD2QMENGINE_H
 
-#include <votca/csg/topology.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/tools/property.h>
 #include <votca/xtp/calculatorfactory.h>
 #include <votca/xtp/statesaversqlite.h>
-#include <votca/xtp/topology.h>
+#include <votca/xtp/xtptopology.h>
 
 namespace XTP = votca::xtp;
 namespace CSG = votca::csg;
@@ -42,11 +42,11 @@ class Md2QmEngine {
   void PrintInfo();
 
   // Converts atomistic to QM topology
-  void Md2Qm(csg::Topology *mdtop, Topology *qmtop);
+  void Md2Qm(csg::CSG_Topology *mdtop, XTP_Topology *qmtop);
   // Creates an QM molecule container based on MD molecule and the xml std::map
   Molecule *MoleculeFactory(csg::Molecule *molMDTemplate);
   // Partitions the QM molecule on segments and fragments
-  Molecule *ExportMolecule(Molecule *molQM, Topology *qmtop);
+  Molecule *ExportMolecule(Molecule *molQM, XTP_Topology *qmtop);
 
  private:
   tools::Property _typology;

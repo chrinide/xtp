@@ -18,33 +18,31 @@
  */
 
 #ifndef VOTCA_XTP_QMTOOLFACTORY_H
-#define	VOTCA_XTP_QMTOOLFACTORY_H
+#define VOTCA_XTP_QMTOOLFACTORY_H
 
 #include <votca/tools/objectfactory.h>
 #include <votca/xtp/qmtool.h>
 
-namespace votca { namespace xtp {
+namespace votca {
+namespace xtp {
 
-class QMToolFactory : public tools::ObjectFactory<std::string, QMTool>
-{
-    
-private:
-    QMToolFactory() {}
-    
-public:
-    
-    static void RegisterAll(void);
+class QMToolFactory : public tools::ObjectFactory<std::string, QMTool> {
 
-    friend QMToolFactory &QMTools();
+ private:
+  QMToolFactory() {}
+
+ public:
+  static void RegisterAll(void);
+
+  friend QMToolFactory &QMTools();
 };
 
-inline QMToolFactory &QMTools()
-{
-    static QMToolFactory _instance;
-    return _instance;
+inline QMToolFactory &QMTools() {
+  static QMToolFactory _instance;
+  return _instance;
 }
 
-}}
+}  // namespace xtp
+}  // namespace votca
 
-#endif	// VOTCA_XTP_QMTOOLFACTORY_H 
-
+#endif  // VOTCA_XTP_QMTOOLFACTORY_H
