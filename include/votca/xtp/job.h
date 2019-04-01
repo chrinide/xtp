@@ -32,8 +32,120 @@ namespace xtp {
 
 class Job {
 
+<<<<<<< Updated upstream
  public:
   enum JobStatus { AVAILABLE, ASSIGNED, FAILED, COMPLETE };
+=======
+  namespace votca {
+  namespace xtp {
+
+  class Job {
+
+   public:
+    enum JobStatus { AVAILABLE, ASSIGNED, FAILED, COMPLETE };
+
+    Job(tools::Property &prop);
+    Job(int id, std::string &tag, std::string &input, std::string stat);
+    Job(int id, std::string &tag, tools::Property &input, JobStatus stat);
+
+    std::string ConvertStatus(JobStatus) const;
+    JobStatus ConvertStatus(std::string) const;
+
+    class Result {
+     public:
+      void setStatus(JobStatus stat) { _status = stat; }
+      void setOutput(std::string output) {
+        _has_output = true;
+        _output = tools::Property().add("output", output);
+      }
+      void setOutput(tools::Property &output) {
+        _has_output = true;
+        _output = output.get("output");
+      }
+      void setError(std::string error) {
+        _has_error = true;
+        _error = error;
+      }
+
+      JobStatus _status;
+      tools::Property _output;
+      bool _has_output;
+      std::string _error;
+      bool _has_error;
+    };
+
+    void Reset();
+    void ToStream(std::ofstream &ofs, std::string fileformat);
+    void UpdateFrom(const Job &ext);
+
+    int getId() const { return _id; }
+    std::string getTag() const { return _tag; }
+    tools::Property &getInput() { return _input; }
+    const JobStatus &getStatus() const { return _status; }
+    std::string getStatusStr() const { return ConvertStatus(_status); }
+
+    bool hasHost() const { return _has_host; }
+    bool hasTime() const { return _has_time; }
+    bool hasOutput() const { return _has_output; }
+    bool hasError() const { return _has_error; }
+
+    bool isAvailable() const { return (_status == AVAILABLE) ? true : false; }
+    bool isAssigned() const { return (_status == ASSIGNED) ? true : false; }
+    bool isFailed() const { return (_status == FAILED) ? true : false; }
+    bool isComplete() const { return (_status == COMPLETE) ? true : false; }
+    bool isFresh() const { return (_attemptsCount < 1) ? true : false; }
+
+    void setStatus(JobStatus stat) { _status = stat; }
+    void setStatus(std::string stat) { _status = ConvertStatus(stat); }
+    void setTime(std::string time) {
+      _time = time;
+      _has_time = true;
+    }
+    void setHost(std::string host) {
+      _host = host;
+      _has_host = true;
+    }
+    void setOutput(std::string output) {
+      _output = tools::Property().add("output", output);
+      _has_output = true;
+    }
+
+    const std::string &getHost() const {
+      assert(_has_host && "Job has no host!");
+      return _host;
+    }
+    const std::string &getTime() const {
+      assert(_has_time && "Job has no time!");
+      return _time;
+    }
+    const tools::Property &getOutput() const {
+      assert(_has_output && "Job has no output!");
+      return _output;
+    }
+    const std::string &getError() const {
+      assert(_has_error & "Job has no error!");
+      return _error;
+    }
+
+   protected:
+    // Defined by user
+    int _id;
+    std::string _tag;
+    JobStatus _status = JobStatus::AVAILABLE;
+    int _attemptsCount = 0;
+    tools::Property _input;
+
+    // Generated during runtime
+    std::string _host = "";
+    bool _has_host = false;
+    std::string _time = "";
+    bool _has_time = false;
+    tools::Property _output;
+    bool _has_error = false;
+    bool _has_output = false;
+    std::string _error = "";
+  };
+>>>>>>> Stashed changes
 
   Job(tools::Property *prop);
   Job(int id, std::string &tag, std::string &input, std::string stat);

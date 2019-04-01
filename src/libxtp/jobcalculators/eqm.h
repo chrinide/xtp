@@ -37,11 +37,11 @@ namespace xtp {
  * Callname: eqm
  */
 
-class EQM : public ParallelXJobCalc<std::vector<Job *>, Job *, Job::JobResult> {
+class EQM : public ParallelXJobCalc<Job> {
  public:
   std::string Identify() { return "eqm"; }
   void Initialize(tools::Property &options);
-  Job::JobResult EvalJob(Topology &top, Job *job, QMThread *thread);
+  Job::Result EvalJob(Topology &top, Job &job, QMThread &thread);
 
   void CleanUp() { ; }
   void WriteJobFile(Topology &top);
@@ -50,7 +50,7 @@ class EQM : public ParallelXJobCalc<std::vector<Job *>, Job *, Job::JobResult> {
  private:
   void WriteLoggerToFile(const std::string &logfile, Logger &logger);
 
-  void SetJobToFailed(Job::JobResult &jres, Logger &pLog,
+  void SetJobToFailed(Job::Result &jres, Logger &pLog,
                       const std::string &errormessage);
   void ParseOptionsXML(tools::Property &options);
 

@@ -39,13 +39,13 @@ namespace xtp {
  */
 
 class IEXCITON
-    : public ParallelXJobCalc<std::vector<Job *>, Job *, Job::JobResult> {
+    : public ParallelXJobCalc<std::vector<Job *>, Job *, Job::Result> {
  public:
   void Initialize(tools::Property &options);
 
   std::string Identify() { return "iexcitoncl"; }
 
-  Job::JobResult EvalJob(Topology &top, Job *job, QMThread *Thread);
+  Job::Result EvalJob(Topology &top, Job *job, QMThread *Thread);
 
   void WriteJobFile(Topology &top);
   void ReadJobFile(Topology &top);

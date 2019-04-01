@@ -34,12 +34,55 @@ namespace votca {
 namespace xtp {
 
 class QMThread;
+<<<<<<< Updated upstream
 
 // TYPENAME EXAMPLE USAGE
 //     ProgObserver< vector<Job*>, Job*, Job::JobResult >
 // REQUIRED METHODS FOR TYPENAMES
 //     pJob ->getId() ->SaveResults(rJob)
 //     JobContainer .size() .begin() .end()
+=======
+
+template <typename jobtype>
+class ProgObserver {
+
+ public:
+  void InitCmdLineOpts(const boost::program_options::variables_map &optsMap);
+  void InitFromProgFile(std::string progFile, QMThread &master);
+  jobtype *RequestNextJob(QMThread &thread);
+  void ReportJobDone(pJob job, rJob &res, QMThread &thread);
+
+  void SyncWithProgFile(QMThread &thread);
+  void LockProgFile(QMThread &thread);
+  void ReleaseProgFile(QMThread &thread);
+
+ private:
+  std::string GenerateHost();
+  std::string GenerateTime();
+
+  std::string _lockFile = "";
+  std::string _progFile = "";
+  int _cacheSize = -1;
+  std::vector<Job> _jobs;
+
+  std::vector<pJob> _jobsToProc;
+  std::vector<pJob> _jobsToSync;
+
+  JobItVec _nextjit = nullptr;
+  JobItCnt _metajit = nullptr;
+  tools::Mutex _lockThread;
+  std::unique_ptr<boost::interprocess::file_lock> _flock = nullptr;
+
+  std::map<std::string, bool> _restart_hosts;
+  std::map<std::string, bool> _restart_stats;
+  bool _restartMode;
+  int _jobsReported;
+
+  bool _moreJobsAvailable;
+  int _startJobsCount = 0;
+  int _maxJobs;
+};
+>>>>>>> Stashed changes
 
 template <typename JobContainer, typename pJob, typename rJob>
 class ProgObserver {

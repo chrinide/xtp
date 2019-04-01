@@ -93,10 +93,10 @@ std::map<std::string, QMState> IEXCITON::FillParseMaps(
   return type2level;
 }
 
-Job::JobResult IEXCITON::EvalJob(Topology& top, Job* job, QMThread* opThread) {
+Job::Result IEXCITON::EvalJob(Topology& top, Job* job, QMThread* opThread) {
 
   // report back to the progress observer
-  Job::JobResult jres = Job::JobResult();
+  Job::Result jres = Job::Result();
 
   // get the logger from the thread
   Logger& pLog = opThread->getLogger();

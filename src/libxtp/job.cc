@@ -25,6 +25,7 @@
 #include <votca/xtp/job.h>
 
 using boost::format;
+<<<<<<< Updated upstream
 namespace votca {
 namespace xtp {
 
@@ -97,6 +98,53 @@ Job::Job(int id, std::string &tag, tools::Property &input, JobStatus status)
   _input = input.get("input");
   _status = status;
   _attemptsCount = 0;
+=======
+namespace votca {
+namespace xtp {
+
+Job::Job(tools::Property &prop) {
+
+  // DEFINED BY USER
+  _id = prop->get("id").as<int>();
+  _tag = prop->get("tag").as<std::string>();
+  _input = prop->get("input");
+
+  if (prop->exists("status"))
+    _status = ConvertStatus(prop->get("status").as<std::string>());
+  else
+    _status = AVAILABLE;
+
+  // GENERATED DURING RUNTIME
+  if (prop->exists("host")) {
+    _host = prop->get("host").as<std::string>();
+    _has_host = true;
+  }
+  if (prop->exists("time")) {
+    _time = prop->get("time").as<std::string>();
+    _has_time = true;
+  }
+  if (prop->exists("output")) {
+    _output = prop->get("output");
+    _has_output = true;
+  }
+  if (prop->exists("error")) {
+    _error = prop->get("error").as<std::string>();
+    _has_error = true;
+  }
+}
+
+Job::Job(int id, std::string &tag, std::string &inputstr, std::string status)
+    : _id(id), _tag(tag) {
+  tools::Property input("input", inputstr, "");
+  _input = input;
+  _status = ConvertStatus(status);
+}
+
+Job::Job(int id, std::string &tag, tools::Property &input, JobStatus status)
+    : _id(id), _tag(tag) {
+  _input = input.get("input");
+  _status = status;  
+>>>>>>> Stashed changes
 }
 
 std::string Job::ConvertStatus(JobStatus status) const {
@@ -146,6 +194,7 @@ void Job::Reset() {
 
 void Job::ToStream(std::ofstream &ofs, std::string fileformat) {
 
+<<<<<<< Updated upstream
   tools::PropertyIOManipulator iomXML(tools::PropertyIOManipulator::XML, 0,
                                       "\t\t");
 
@@ -193,6 +242,72 @@ void Job::ToStream(std::ofstream &ofs, std::string fileformat) {
 }
 
 void Job::UpdateFrom(Job *ext) {
+=======
+  tools::PropertyIOManipulator iomXML(tools::PropertyIOManipulator::XML, 0,
+                                      "\t\t");
+
+  if (fileformat == "xml") {
+    std::string tab = "\t";
+
+    ofs << tab << "<job>\n";
+    ofs << tab << tab << (format("<id>%1$d</id>\n") % _id).str();
+    ofs << tab << tab << (format("<tag>%1$s</tag>\n") % _tag).str();
+    ofs << iomXML << _input;
+    ofs << tab << tab
+        << (format("<status>%1$s</status>\n") % ConvertStatus(_status)).str();
+
+    if (_has_host)
+      ofs << tab << tab << (format("<host>%1$s</host>\n") % _host).str();
+    if (_has_time)
+      ofs << tab << tab << (format("<time>%1$s</time>\n") % _time).str();
+    if (_has_output) ofs << iomXML << _output;
+    if (_has_error)
+      ofs << tab << tab << (format("<error>%1$s</error>\n") % _error).str();
+    ofs << tab << "</job>\n";
+  } else if (fileformat == "tab") {
+    std::string time = _time;
+    if (!_has_time) time = "__:__";
+    std::string host = _host;
+    if (!_has_host) host = "__:__";
+    std::string status = ConvertStatus(_status);
+
+    std::stringstream input;
+    std::stringstream output;
+
+    input << iomXML << _input;
+    output << iomXML << _output;
+    ofs << (format("%4$10s %5$20s %6$10s %1$5d %2$10s %3$30s %7$s %8$s\n") %
+            _id % _tag % input.str() % status % host % time % _error %
+            output.str())
+               .str();
+  } else {
+    throw std::runtime_error("Job::ToStream only supports xml and tab format");
+  }
+
+  return;
+}
+
+void Job::UpdateFrom(const Job &ext) {
+  _status = ext->getStatus();
+  if (ext->hasHost()) {
+    _has_host = true;
+    _host = ext->getHost();
+  }
+  if (ext->hasTime()) {
+    _has_time = true;
+    _time = ext->getTime();
+  }
+  if (ext->hasOutput()) {
+    _has_output = true;
+    _output = ext->getOutput();
+  }
+  if (ext->hasError()) {
+    _has_error = true;
+    _error = ext->getError();
+  }
+  return;
+}
+>>>>>>> Stashed changes
 
   _status = ext->getStatus();
   if (ext->hasHost()) {
@@ -215,6 +330,7 @@ void Job::UpdateFrom(Job *ext) {
   return;
 }
 
+<<<<<<< Updated upstream
 void Job::SaveResults(JobResult *res) {
 
   _status = res->_status;
@@ -234,3 +350,7 @@ void Job::SaveResults(JobResult *res) {
 
 }  // namespace xtp
 }  // namespace votca
+=======
+}
+}
+>>>>>>> Stashed changes

@@ -111,7 +111,7 @@ void EQM::WriteJobFile(Topology& top) {
   std::cout << jobCount << " jobs" << std::flush;
 }
 
-void EQM::SetJobToFailed(Job::JobResult& jres, Logger& pLog,
+void EQM::SetJobToFailed(Job::Result& jres, Logger& pLog,
                          const std::string& errormessage) {
   XTP_LOG(logERROR, pLog) << errormessage << std::flush;
   std::cout << pLog;
@@ -128,10 +128,10 @@ void EQM::WriteLoggerToFile(const std::string& logfile, Logger& logger) {
   ofs << logger << std::endl;
   ofs.close();
 }
-Job::JobResult EQM::EvalJob(Topology& top, Job* job, QMThread* opThread) {
+Job::Result EQM::EvalJob(Topology& top, Job* job, QMThread* opThread) {
 
   Orbitals orbitals;
-  Job::JobResult jres = Job::JobResult();
+  Job::Result jres = Job::Result();
   tools::Property _job_input = job->getInput();
   std::vector<tools::Property*> lSegments = _job_input.Select("segment");
   int segId = lSegments.front()->getAttribute<int>("id");

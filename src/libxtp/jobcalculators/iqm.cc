@@ -191,7 +191,7 @@ void IQM::WriteCoordinatesToOrbitalsPBC(QMPair& pair, Orbitals& orbitals) {
   segments.push_back(seg2);
 }
 
-void IQM::SetJobToFailed(Job::JobResult& jres, Logger& pLog,
+void IQM::SetJobToFailed(Job::Result& jres, Logger& pLog,
                          const std::string& errormessage) {
   XTP_LOG(logERROR, pLog) << errormessage << std::flush;
   std::cout << pLog;
@@ -209,10 +209,10 @@ void IQM::WriteLoggerToFile(const std::string& logfile, Logger& logger) {
   ofs.close();
 }
 
-Job::JobResult IQM::EvalJob(Topology& top, Job* job, QMThread* opThread) {
+Job::Result IQM::EvalJob(Topology& top, Job& job, QMThread& opThread) {
 
   // report back to the progress observer
-  Job::JobResult jres = Job::JobResult();
+  Job::Result jres = Job::Result();
 
   std::string iqm_work_dir = "OR_FILES";
   std::string eqm_work_dir = "OR_FILES";

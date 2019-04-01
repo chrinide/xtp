@@ -28,39 +28,21 @@
 #include <votca/xtp/progressobserver.h>
 #include <votca/xtp/qmthread.h>
 
-/// PATHWAYS TO A NEW THREADED CALCULATOR
-/// ... 1 Define 'JobContainer' (needs to define iterator), 'pJob' ( =
-/// *iterator)
-/// ... 2 Derive new calculator as ': public
-/// ParallelXJobCalc<JobContainer,pJob>'
-/// ... 3 Specialize XJOBS_FROM_TABLE< JobContainer, pJob> in xjob.cc
-/// ... 4 Register new calculator (see end of parallelxjobcalc.cc)
-
-/// REQUIRED MEMBERS FOR pJob
-/// pJob::JobResult (struct)
-
 namespace votca {
 namespace xtp {
 
-template <typename JobContainer, typename pJob, typename rJob>
+template <typename jobtype>
 class ParallelXJobCalc : public JobCalculator {
 
  public:
   class JobOperator;
 
-  ParallelXJobCalc() : _jobfile("__NOFILE__"){};
-  ~ParallelXJobCalc() { ; };
-
-  std::string Identify() = 0;
+  virtual std::string Identify() = 0;
 
   bool EvaluateFrame(Topology &top);
-  virtual void CustomizeLogger(QMThread &thread);
-  virtual rJob EvalJob(Topology &top, const pJob job, QMThread *thread) = 0;
-
-  void LockCout() { _coutMutex.Lock(); }
-  void UnlockCout() { _coutMutex.Unlock(); }
-  void LockLog() { _logMutex.Lock(); }
-  void UnlockLog() { _logMutex.Unlock(); }
+  void CustomizeLogger(QMThread &thread);
+  virtual jobtype::JobResult EvalJob(Topology &top, const jobtype &job,
+                                     QMThread &thread) = 0;
 
   // ======================================== //
   // XJOB OPERATOR (THREAD)                   //
@@ -68,28 +50,20 @@ class ParallelXJobCalc : public JobCalculator {
 
   class JobOperator : public QMThread {
    public:
-    JobOperator(int id, Topology *top,
-                ParallelXJobCalc<JobContainer, pJob, rJob> *master)
-        : _top(top), _master(master) {
-      _id = id;
-    };
+    JobOperator(int id, Topology &top, ParallelXJobCalc<jobtype> &master)
+        : _id(id), _top(top), _master(master){};
     ~JobOperator(){};
 
-    void InitData(Topology &top) { ; }
-    void Run(void);
+    void Run();
 
-   public:
-    Topology *_top;
-    ParallelXJobCalc<JobContainer, pJob, rJob> *_master;
-    pJob _job;
+   private:
+    Topology &_top;
+    ParallelXJobCalc<jobtype> &_master;
   };
 
  protected:
-  JobContainer _XJobs;
-  tools::Mutex _coutMutex;
-  tools::Mutex _logMutex;
-  std::string _jobfile;
-  int _subthreads;
+  std::vector<jobtype> _XJobs;
+  std::string _jobfile = "";
 };
 
 }  // namespace xtp
